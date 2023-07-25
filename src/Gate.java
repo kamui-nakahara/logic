@@ -4,9 +4,14 @@ import java.awt.geom.Arc2D;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Path2D;
+import java.awt.BasicStroke;
+import java.awt.Rectangle;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.ArrayList;
 
 class Gate{
+  public Color strokeColor=Color.BLACK;
   public String name;
   public int X;
   public int Y;
@@ -18,10 +23,21 @@ class Gate{
   public Point end;
   public boolean truthValue;
   public int terminals;
+  Point center;
   ArrayList<Point> over=new ArrayList<>();//重なってる端子を赤色にする
-  Gate(Point point){
+  Color rectColor=Color.BLUE;
+  public ArrayList<Boolean> input_terminal=new ArrayList<>();
+  Gate(Point point,int terminals){
     this.X=point.x;
     this.Y=point.y;
+    this.terminals=terminals;
+    for (int i=0;i<terminals;i++){
+      input_terminal.add(false);
+    }
+  }
+  public void reverse(){
+  }
+  public void operation(){
   }
   public void update(){
     inputs=new ArrayList<>();
@@ -34,8 +50,55 @@ class Gate{
     for (Point p:outputs_e){
       outputs.add(new Point(p.x+x,p.y+y));
     }
+    int cx;
+    int cy;
+    if (name=="line"){
+      if (getEnd()==null){
+	cx=0;
+	cy=0;
+      }else{
+	Point p1=getBegin();
+	Point p2=getEnd();
+	cx=(p1.x+p2.x)/2;
+	cy=(p1.y+p2.y)/2;
+      }
+    }else{
+      if (inputs.size()==0){
+	cy=outputs.get(0).y;
+	cx=outputs.get(0).x-50;
+      }else if (outputs.size()==0){
+	cy=inputs.get(0).y;
+	cx=inputs.get(0).x+50;
+      }else{
+	cy=outputs.get(0).y;
+	cx=(inputs.get(0).x+outputs.get(0).x)/2;
+      }
+    }
+    center=new Point(cx,cy);
   }
   public void draw(Graphics g){
+  }
+  public Rectangle deleteRect(){
+    return new Rectangle(center.x-Screen.interval,center.y-Screen.interval,Screen.interval*2,Screen.interval*2);
+  }
+  public void rectDraw(Graphics g){
+    Graphics2D g2=(Graphics2D)g;
+    g.setColor(rectColor);
+    g2.setStroke(new BasicStroke(2));
+    g2.draw(deleteRect());
+    g.setColor(Color.BLACK);
+    g2.setStroke(new BasicStroke(1));
+  }
+  public void deleteRectDraw(Graphics g){
+    rectDraw(g);
+    Graphics2D g2=(Graphics2D)g;
+    Rectangle r=deleteRect();
+    g.setColor(rectColor);
+    g2.setStroke(new BasicStroke(2));
+    g.drawLine(r.x+Screen.interval/2,r.y+Screen.interval/2,r.x+Screen.interval*3/2,r.y+Screen.interval*3/2);
+    g.drawLine(r.x+Screen.interval/2,r.y+Screen.interval*3/2,r.x+Screen.interval*3/2,r.y+Screen.interval/2);
+    g.setColor(Color.BLACK);
+    g2.setStroke(new BasicStroke(1));
   }
   public void setBegin(Point point){
   }
@@ -51,19 +114,24 @@ class Gate{
     this.X=point.x;
     this.Y=point.y;
   }
+  public void setTruthValue(){
+    truthValue=!truthValue;
+  }
   public void Over(){
   }
   void dot(Graphics g,int x,int y){
     Graphics2D g2=(Graphics2D)g;
     boolean flag=false;
+    int a=4;
     for (Point point:over){
       if (point.equals(new Point(x,y))){
 	flag=true;
+	a=7;
 	break;
       }
     }
     g.setColor((flag) ? Color.RED : Color.WHITE);
-    g.fillOval(x-4,y-4,8,8);
+    g.fillOval(x-a,y-a,a*2,a*2);
     g.setColor(Color.BLACK);
     g.drawOval(x-4,y-4,8,8);
   }
@@ -72,7 +140,7 @@ class Gate{
 class And extends Gate{
   public int terminals;
   And(Point point,int terminals){
-    super(point);
+    super(point,terminals);
     this.terminals=terminals;
     inputs_e.add(new Point(-20,10));
     inputs_e.add(new Point(-20,30));
@@ -81,6 +149,18 @@ class And extends Gate{
       inputs_e.add(new Point(-20,20));
     }
     this.name="and";
+  }
+  public void operation(){
+    int out=1;
+    for (int i=0;i<terminals;i++){
+      if (!input_terminal.get(i))
+	out*=0;
+    }
+    if (out==0){
+      truthValue=false;
+    }else{
+      truthValue=true;
+    }
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
@@ -108,7 +188,7 @@ class And extends Gate{
 class Or extends Gate{
   public int terminals;
   Or(Point point,int terminals){
-    super(point);
+    super(point,terminals);
     this.terminals=terminals;
     inputs_e.add(new Point(-20,10));
     inputs_e.add(new Point(-20,30));
@@ -117,6 +197,18 @@ class Or extends Gate{
       inputs_e.add(new Point(-20,20));
     }
     this.name="or";
+  }
+  public void operation(){
+    int out=0;
+    for (int i=0;i<terminals;i++){
+      if (input_terminal.get(i))
+	out+=1;
+    }
+    if (out==0){
+      truthValue=false;
+    }else{
+      truthValue=true;
+    }
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
@@ -147,6 +239,18 @@ class Nand extends And{
     super(point,terminals);
     this.name="nand";
   }
+  public void operation(){
+    int out=1;
+    for (int i=0;i<terminals;i++){
+      if (!input_terminal.get(i))
+	out*=0;
+    }
+    if (out==0){
+      truthValue=true;
+    }else{
+      truthValue=false;
+    }
+  }
   public void draw(Graphics g){
     super.draw(g);
     Graphics2D g2=(Graphics2D)g;
@@ -161,6 +265,18 @@ class Nor extends Or{
     super(point,terminals);
     this.name="nor";
   }
+  public void operation(){
+    int out=0;
+    for (int i=0;i<terminals;i++){
+      if (input_terminal.get(i))
+	out+=1;
+    }
+    if (out==0){
+      truthValue=true;
+    }else{
+      truthValue=false;
+    }
+  }
   public void draw(Graphics g){
     super.draw(g);
     Graphics2D g2=(Graphics2D)g;
@@ -172,10 +288,13 @@ class Nor extends Or{
 
 class Not extends Gate{
   Not(Point point){
-    super(point);
+    super(point,1);
     inputs_e.add(new Point(-20,20));
     outputs_e.add(new Point(70,20));
     this.name="not";
+  }
+  public void operation(){
+    truthValue=!input_terminal.get(0);
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
@@ -198,6 +317,17 @@ class Xor extends Or{
     super(point,terminals);
     this.name="xor";
   }
+  public void operation(){
+    int out=0;
+    for (int i=0;i<terminals;i++){
+      if (input_terminal.get(i))
+	out+=1;
+    }
+    if (out%2==0)
+      truthValue=false;
+    else
+      truthValue=true;
+  }
   public void draw(Graphics g){
     super.draw(g);
     Graphics2D g2=(Graphics2D)g;
@@ -212,6 +342,17 @@ class Xnor extends Nor{
     super(point,terminals);
     this.name="xnor";
   }
+  public void operation(){
+    int out=0;
+    for (int i=0;i<terminals;i++){
+      if (input_terminal.get(i))
+	out+=1;
+    }
+    if (out%2==0)
+      truthValue=true;
+    else
+      truthValue=false;
+  }
   public void draw(Graphics g){
     super.draw(g);
     Graphics2D g2=(Graphics2D)g;
@@ -222,13 +363,15 @@ class Xnor extends Nor{
 }
 
 class Input extends Gate{
+  Font font=new Font("",Font.PLAIN,Screen.interval*2);
   Input(Point point,boolean truthValue){
-    super(point);
+    super(point,0);
     outputs_e.add(new Point(70,10));
     this.name="input";
     this.truthValue=truthValue;
   }
   public void draw(Graphics g){
+    g.setColor(strokeColor);
     Graphics2D g2=(Graphics2D)g;
     int x=X-Screen.interval*2;
     int y=Y-Screen.interval*2;
@@ -240,17 +383,27 @@ class Input extends Gate{
     p.lineTo(x+40,y+20);
     p.lineTo(x+50,y+10);
     p.lineTo(x+66,y+10);
+    g2.setFont(font);
     if (truthValue)
-      g2.fill(p);
+      drawStringCenter(g,"H");
     else
-      g2.draw(p);
+      drawStringCenter(g,"L");
+    g2.draw(p);
     dot(g,x+70,y+10);
+  }
+  public void drawStringCenter(Graphics g,String text){
+    FontMetrics fm=g.getFontMetrics();
+    Rectangle rectText=fm.getStringBounds(text,g).getBounds();
+    int x=center.x-rectText.width/2;
+    int y=center.y-rectText.height/2+fm.getMaxAscent();
+    g.drawString(text,x,y);
   }
 }
 
 class Output extends Gate{
+  Font font=new Font("",Font.PLAIN,Screen.interval*2);
   Output(Point point,boolean truthValue){
-    super(point);
+    super(point,1);
     inputs_e.add(new Point(-30,10));
     this.name="output";
     this.truthValue=truthValue;
@@ -268,20 +421,31 @@ class Output extends Gate{
     p.lineTo(x+40,y+20);
     p.moveTo(x-10,y+10);
     p.lineTo(x-26,y+10);
+    g2.setFont(font);
     if (truthValue)
-      g2.fill(p);
+      drawStringCenter(g,"H");
     else
-      g2.draw(p);
+      drawStringCenter(g,"L");
+    g2.draw(p);
     dot(g,x-30,y+10);
+  }
+  public void drawStringCenter(Graphics g,String text){
+    FontMetrics fm=g.getFontMetrics();
+    Rectangle rectText=fm.getStringBounds(text,g).getBounds();
+    int x=center.x-rectText.width/2;
+    int y=center.y-rectText.height/2+fm.getMaxAscent();
+    g.drawString(text,x,y);
   }
 }
 
 class Line extends Gate{
   public Point begin;
   public Point end;
+  public boolean reverse=false;
   Line(Point point){
-    super(point);
+    super(point,1);
     this.name="line";
+    this.terminals=1;
   }
   public void setBegin(Point point){
     begin=point;
@@ -289,11 +453,23 @@ class Line extends Gate{
   public void setEnd(Point point){
     end=point;
   }
+  public void reverse(){
+    reverse=!reverse;
+  }
   public Point getBegin(){
-    return begin;
+    if (reverse)
+      return end;
+    else
+      return begin;
   }
   public Point getEnd(){
-    return end;
+    if (reverse)
+      return begin;
+    else
+      return end;
+  }
+  public void operation(){
+    truthValue=input_terminal.get(0);
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
