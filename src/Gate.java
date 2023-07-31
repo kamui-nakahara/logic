@@ -9,8 +9,10 @@ import java.awt.Rectangle;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 class Gate{
+  HashMap<String,String> truthTable=new HashMap<>();
   public Color strokeColor=Color.BLACK;
   public String name;
   public int X;
@@ -23,6 +25,7 @@ class Gate{
   public Point end;
   public boolean truthValue;
   public int terminals;
+  int output_terminals;
   Point center;
   ArrayList<Point> over=new ArrayList<>();//重なってる端子を赤色にする
   Color rectColor=Color.BLUE;
@@ -34,6 +37,9 @@ class Gate{
     for (int i=0;i<terminals;i++){
       input_terminal.add(false);
     }
+  }
+  public Point getCenter(){
+    return center;
   }
   public void reverse(){
   }
@@ -84,21 +90,21 @@ class Gate{
   public void rectDraw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
     g.setColor(rectColor);
-    g2.setStroke(new BasicStroke(2));
+    g2.setStroke(new BasicStroke(5));
     g2.draw(deleteRect());
     g.setColor(Color.BLACK);
-    g2.setStroke(new BasicStroke(1));
+    g2.setStroke(new BasicStroke(2));
   }
   public void deleteRectDraw(Graphics g){
     rectDraw(g);
     Graphics2D g2=(Graphics2D)g;
     Rectangle r=deleteRect();
     g.setColor(rectColor);
-    g2.setStroke(new BasicStroke(2));
+    g2.setStroke(new BasicStroke(5));
     g.drawLine(r.x+Screen.interval/2,r.y+Screen.interval/2,r.x+Screen.interval*3/2,r.y+Screen.interval*3/2);
     g.drawLine(r.x+Screen.interval/2,r.y+Screen.interval*3/2,r.x+Screen.interval*3/2,r.y+Screen.interval/2);
     g.setColor(Color.BLACK);
-    g2.setStroke(new BasicStroke(1));
+    g2.setStroke(new BasicStroke(2));
   }
   public void setBegin(Point point){
   }
@@ -116,6 +122,13 @@ class Gate{
   }
   public void setTruthValue(){
     truthValue=!truthValue;
+  }
+  public void setTruthValue(int a){
+    if (a==0){
+      truthValue=false;
+    }else{
+      truthValue=true;
+    }
   }
   public void Over(){
   }
@@ -487,6 +500,60 @@ class Line extends Gate{
 	p.lineTo(end.x,end.y);
       }
       g2.draw(p);
+    }
+  }
+}
+
+class Block extends Gate{
+  Block(Point point,HashMap<String,String> truthTable,String name,int input_terminals,int output_terminals){
+    super(point,input_terminals);
+    this.truthTable=truthTable;
+    this.name=name;
+    this.output_terminals=output_terminals;
+    int x=X-Screen.interval*2;
+    int y=Y-Screen.interval*2;
+    for (int i=0;i<terminals/2;i++){
+      inputs_e.add(new Point(x-Screen.interval*2,y+Screen.interval*2-(i+1)*Screen.interval));
+      inputs_e.add(new Point(x-Screen.interval*2,y+Screen.interval*2+(i+1)*Screen.interval));
+    }
+    if (terminals%2==1){
+      inputs_e.add(new Point(x-Screen.interval*2,y+Screen.interval*2));
+    }
+    for (int i=0;i<output_terminals/2;i++){
+      outputs_e.add(new Point(x+Screen.interval*6,y+Screen.interval*2-(i+1)*Screen.interval));
+      outputs_e.add(new Point(x+Screen.interval*6,y+Screen.interval*2+(i+1)*Screen.interval));
+    }
+    if (output_terminals%2==1){
+      outputs_e.add(new Point(x-Screen.interval*2,y+Screen.interval*2));
+    }
+  }
+  public void operation(){
+  }
+  public void draw(Graphics g){
+    int x=X-Screen.interval*2;
+    int y=Y-Screen.interval*2;
+    g.drawRect(x,y,Screen.interval*4,Screen.interval*4);
+    g.drawLine(x,y+Screen.interval*2-(terminals/2+1)*Screen.interval,x,y+Screen.interval*2+(terminals/2+1)*Screen.interval);
+    g.drawLine(x+Screen.interval*4,y+Screen.interval*2-(output_terminals/2+1)*Screen.interval,x+Screen.interval*4,y+Screen.interval*2+(output_terminals/2+1)*Screen.interval);
+    for (int i=0;i<terminals/2;i++){
+      g.drawLine(x,y+Screen.interval*2-(i+1)*Screen.interval,x-Screen.interval*2,y+Screen.interval*2-(i+1)*Screen.interval);
+      g.drawLine(x,y+Screen.interval*2+(i+1)*Screen.interval,x-Screen.interval*2,y+Screen.interval*2+(i+1)*Screen.interval);
+      dot(g,x-Screen.interval*2,y+Screen.interval*2-(i+1)*Screen.interval);
+      dot(g,x-Screen.interval*2,y+Screen.interval*2+(i+1)*Screen.interval);
+    }
+    if (terminals%2==1){
+      g.drawLine(x,y+Screen.interval*2,x-Screen.interval*2,y+Screen.interval*2);
+      dot(g,x-Screen.interval*2,y+Screen.interval*2);
+    }
+    for (int i=0;i<output_terminals/2;i++){
+      g.drawLine(x+Screen.interval*4,y+Screen.interval*2-(i+1)*Screen.interval,x+Screen.interval*6,y+Screen.interval*2-(i+1)*Screen.interval);
+      g.drawLine(x+Screen.interval*4,y+Screen.interval*2+(i+1)*Screen.interval,x+Screen.interval*6,y+Screen.interval*2+(i+1)*Screen.interval);
+      dot(g,x+Screen.interval*6,y+Screen.interval*2-(i+1)*Screen.interval);
+      dot(g,x+Screen.interval*6,y+Screen.interval*2+(i+1)*Screen.interval);
+    }
+    if (output_terminals%2==1){
+      g.drawLine(x+Screen.interval*4,y+Screen.interval*2,x+Screen.interval*6,y+Screen.interval*2);
+      dot(g,x+Screen.interval*6,y+Screen.interval*2);
     }
   }
 }

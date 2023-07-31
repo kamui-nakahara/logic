@@ -3,6 +3,7 @@ import javax.swing.JPanel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
@@ -10,10 +11,14 @@ import java.awt.event.KeyListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
+import java.awt.Rectangle;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
 import java.awt.Point;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 class Display extends JFrame implements KeyListener{
   public int width;
@@ -45,17 +50,17 @@ class Display extends JFrame implements KeyListener{
       }
     });
     menu2.add(item2_1);
-    JMenuItem item2_2=new JMenuItem("設置");
+    JMenuItem item2_2=new JMenuItem("入力切り替え");
     item2_2.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
-	screen.state=0;
+	screen.state=2;
       }
     });
     menu2.add(item2_2);
-    JMenuItem item2_3=new JMenuItem("入力切り替え");
+    JMenuItem item2_3=new JMenuItem("ブロック化");
     item2_3.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
-	screen.state=2;
+	screen.state=3;
       }
     });
     menu2.add(item2_3);
@@ -65,6 +70,7 @@ class Display extends JFrame implements KeyListener{
     item3_1.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new And(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_1);
@@ -72,6 +78,7 @@ class Display extends JFrame implements KeyListener{
     item3_2.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new And(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_2);
@@ -79,6 +86,7 @@ class Display extends JFrame implements KeyListener{
     item3_3.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Or(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_3);
@@ -86,6 +94,7 @@ class Display extends JFrame implements KeyListener{
     item3_4.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Or(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_4);
@@ -93,6 +102,7 @@ class Display extends JFrame implements KeyListener{
     item3_5.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Not(screen.mousePoint);
+	screen.state=0;
       }
     });
     menu3.add(item3_5);
@@ -100,6 +110,7 @@ class Display extends JFrame implements KeyListener{
     item3_6.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Nand(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_6);
@@ -107,6 +118,7 @@ class Display extends JFrame implements KeyListener{
     item3_7.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Nand(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_7);
@@ -114,6 +126,7 @@ class Display extends JFrame implements KeyListener{
     item3_8.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Nor(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_8);
@@ -121,6 +134,7 @@ class Display extends JFrame implements KeyListener{
     item3_9.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Nor(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_9);
@@ -128,6 +142,7 @@ class Display extends JFrame implements KeyListener{
     item3_10.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Xor(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_10);
@@ -135,6 +150,7 @@ class Display extends JFrame implements KeyListener{
     item3_11.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Xor(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_11);
@@ -142,6 +158,7 @@ class Display extends JFrame implements KeyListener{
     item3_12.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Xnor(screen.mousePoint,2);
+	screen.state=0;
       }
     });
     menu3.add(item3_12);
@@ -149,6 +166,7 @@ class Display extends JFrame implements KeyListener{
     item3_13.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Xnor(screen.mousePoint,3);
+	screen.state=0;
       }
     });
     menu3.add(item3_13);
@@ -156,6 +174,7 @@ class Display extends JFrame implements KeyListener{
     item3_14.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Input(screen.mousePoint,false);
+	screen.state=0;
       }
     });
     menu3.add(item3_14);
@@ -163,6 +182,7 @@ class Display extends JFrame implements KeyListener{
     item3_15.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Output(screen.mousePoint,false);
+	screen.state=0;
       }
     });
     menu3.add(item3_15);
@@ -170,6 +190,7 @@ class Display extends JFrame implements KeyListener{
     item3_16.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Line(screen.mousePoint);
+	screen.state=0;
       }
     });
     menu3.add(item3_16);
@@ -207,11 +228,13 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   public static int interval=10;
   public int state=0; //0:ゲート設置 1:削除 2:入力切り替え
   Color mouseColor=new Color(128,128,128,128);
-  public Gate gate=new And(mousePoint,2);
+  //public Gate gate=new And(mousePoint,2);
+  public Gate gate=new Block(mousePoint,new HashMap<String,String>(),"a",2,2);
   ArrayList<Gate> gates=new ArrayList<>();
   boolean moved=false;
   boolean released=false;
   boolean pressed=false;
+  Point select=null;
   Screen(Display display){
     super();
     this.display=display;
@@ -314,12 +337,71 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	    break;
 	  }
 	}
+	if (select!=null){
+	  Rectangle rect=new Rectangle(Math.min(select.x,mousePoint.x),Math.min(select.y,mousePoint.y),Math.abs(select.x-mousePoint.x),Math.abs(select.y-mousePoint.y));
+	  ArrayList<Gate> removeGates=new ArrayList<>();
+	  for (Gate gate:gates){
+	    if (rect.contains(gate.getCenter())){
+	      removeGates.add(gate);
+	    }
+	  }
+	  for (Gate gate:removeGates){
+	    gates.remove(gates.indexOf(gate));
+	  }
+	  select=null;
+	}
       }else if (state==2){
 	for (Gate gate:gates){
 	  if (gate.name=="input" && gate.deleteRect().contains(mousePoint)){
 	    gate.setTruthValue();
 	  }
 	}
+      }else if (state==3){
+	  Rectangle rect=new Rectangle(Math.min(select.x,mousePoint.x),Math.min(select.y,mousePoint.y),Math.abs(select.x-mousePoint.x),Math.abs(select.y-mousePoint.y));
+	  ArrayList<Gate> removeGates=new ArrayList<>();
+	  ArrayList<Gate> inputs=new ArrayList<>();
+	  ArrayList<Gate> outputs=new ArrayList<>();
+	  for (Gate gate:gates){
+	    if (rect.contains(gate.getCenter())){
+	      removeGates.add(gate);
+	      if (gate.name=="input"){
+		inputs.add(gate);
+	      }
+	      if (gate.name=="output"){
+		outputs.add(gate);
+	      }
+	    }
+	  }
+	  if (removeGates.size()>0 && inputs.size()>0 && outputs.size()>0){
+	    String name=JOptionPane.showInputDialog(display,"ブロックの名前を定義");
+	    HashMap<String,String> truthTable=new HashMap<>();
+	    if (!name.equals("")){
+	      for (int i=0;i<Math.pow(2,inputs.size());i++){
+		int b=i;
+		String inputSide="";
+		for (int j=inputs.size()-1;j>=0;j--){
+		  int c=0;
+		  if (b>=Math.pow(2,j)){
+		    c=1;
+		    b-=Math.pow(2,j);
+		  }
+		  inputSide+=c;
+		  inputs.get(j).setTruthValue(c);
+		  run(inputs.get(j));
+		}
+		String outputSide="";
+		for (Gate gate:outputs){
+		  outputSide+=((gate.truthValue) ? 1 : 0);
+		}
+		truthTable.put(inputSide,outputSide);
+	      }
+	      for (Gate gate:removeGates){
+		gates.remove(gates.indexOf(gate));
+	      }
+	      System.out.println("");
+	    }
+	  }
+	  select=null;
       }
       released=false;
     }
@@ -390,6 +472,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   public void paintComponent(Graphics g){
     super.paintComponent(g);
     background(g);
+    Graphics2D g2=(Graphics2D)g;
+    g2.setStroke(new BasicStroke(2));
     g.setColor(mouseColor);
     g.fillOval(mousePoint.x-8,mousePoint.y-8,16,16);
     switch(state){
@@ -402,6 +486,12 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
       g.setColor(Color.BLACK);
       gate.draw(g);
       if (state==1)gate.deleteRectDraw(g);
+    }
+    if (select!=null){
+      g.setColor(new Color(255,0,0));
+      g2.setStroke(new BasicStroke(5));
+      Rectangle rect=new Rectangle(Math.min(select.x,mousePoint.x),Math.min(select.y,mousePoint.y),Math.abs(select.x-mousePoint.x),Math.abs(select.y-mousePoint.y));
+      g2.draw(rect);
     }
   }
   void background(Graphics g){
@@ -417,6 +507,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   }
   @Override
   public void mouseDragged(MouseEvent e){
+    mousePoint.x=(int)((e.getPoint().x+interval/2)/interval)*interval;
+    mousePoint.y=(int)((e.getPoint().y+interval/2)/interval)*interval;
   }
   @Override
   public void mouseMoved(MouseEvent e){
@@ -436,6 +528,9 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   @Override
   public void mousePressed(MouseEvent e){
     mouseColor=new Color(128,128,128,255);
+    if (state==1 || state==3){
+      select=e.getPoint();
+    }
   }
   @Override
   public void mouseReleased(MouseEvent e){
@@ -448,6 +543,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
     switch(e.getKeyCode()){
       case KeyEvent.VK_ENTER:
 	released=true;
+	select=mousePoint;
 	break;
       case KeyEvent.VK_UP:
 	mousePoint.y-=interval;
@@ -468,56 +564,72 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
       case KeyEvent.VK_Z:
 	pressed=true;
 	break;
-      case KeyEvent.VK_DELETE:
-	state=state-1;
+      case KeyEvent.VK_SPACE:
+	state=(state+1)%4;
 	break;
       case KeyEvent.VK_0:
 	gate=new And(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_1:
 	gate=new And(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_2:
 	gate=new Or(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_3:
 	gate=new Or(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_4:
 	gate=new Not(mousePoint);
+	state=0;
 	break;
       case KeyEvent.VK_5:
 	gate=new Nand(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_6:
 	gate=new Nand(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_7:
 	gate=new Nor(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_8:
 	gate=new Nor(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_9:
 	gate=new Xor(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_A:
 	gate=new Xor(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_B:
 	gate=new Xnor(mousePoint,2);
+	state=0;
 	break;
       case KeyEvent.VK_C:
 	gate=new Xnor(mousePoint,3);
+	state=0;
 	break;
       case KeyEvent.VK_D:
 	gate=new Input(mousePoint,false);
+	state=0;
 	break;
       case KeyEvent.VK_E:
 	gate=new Output(mousePoint,false);
+	state=0;
 	break;
       case KeyEvent.VK_F:
 	gate=new Line(mousePoint);
+	state=0;
 	break;
     }
   }
