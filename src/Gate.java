@@ -23,7 +23,7 @@ class Gate{
   public ArrayList<Point> outputs=new ArrayList<>();//出力端子の絶対座標
   public Point begin;
   public Point end;
-  public boolean truthValue;
+  public ArrayList<Boolean> truthValue=new ArrayList<>();
   public int terminals;
   int output_terminals;
   Point center;
