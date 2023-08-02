@@ -25,7 +25,7 @@ class Gate{
   public Point end;
   public ArrayList<Boolean> truthValue=new ArrayList<>();
   public int terminals;
-  int output_terminals;
+  int output_terminals=1;
   Point center;
   ArrayList<Point> over=new ArrayList<>();//重なってる端子を赤色にする
   Color rectColor=Color.BLUE;
@@ -36,6 +36,9 @@ class Gate{
     this.terminals=terminals;
     for (int i=0;i<terminals;i++){
       input_terminal.add(false);
+    }
+    for (int i=0;i<output_terminals;i++){
+      truthValue.add(false);
     }
   }
   public Point getCenter(){
@@ -120,15 +123,17 @@ class Gate{
     this.X=point.x;
     this.Y=point.y;
   }
-  public void setTruthValue(){
-    truthValue=!truthValue;
+  public void setTruthValue(int index,boolean value){
+    truthValue.set(index,value);
   }
-  public void setTruthValue(int a){
-    if (a==0){
-      truthValue=false;
-    }else{
-      truthValue=true;
-    }
+  public void setTruthValue(int index,int value){
+    truthValue.set(index,((value==1) ? true : false));
+  }
+  public void setTruthValue(int index){
+    truthValue.set(index,!truthValue.get(index));
+  }
+  public void setTruthValue(){
+    truthValue.set(0,!truthValue.get(0));
   }
   public void Over(){
   }
@@ -170,9 +175,9 @@ class And extends Gate{
 	out*=0;
     }
     if (out==0){
-      truthValue=false;
+      truthValue.set(0,false);
     }else{
-      truthValue=true;
+      truthValue.set(0,true);
     }
   }
   public void draw(Graphics g){
@@ -218,9 +223,9 @@ class Or extends Gate{
 	out+=1;
     }
     if (out==0){
-      truthValue=false;
+      truthValue.set(0,false);
     }else{
-      truthValue=true;
+      truthValue.set(0,true);
     }
   }
   public void draw(Graphics g){
@@ -259,9 +264,9 @@ class Nand extends And{
 	out*=0;
     }
     if (out==0){
-      truthValue=true;
+      truthValue.set(0,true);
     }else{
-      truthValue=false;
+      truthValue.set(0,false);
     }
   }
   public void draw(Graphics g){
@@ -285,9 +290,9 @@ class Nor extends Or{
 	out+=1;
     }
     if (out==0){
-      truthValue=true;
+      truthValue.set(0,true);
     }else{
-      truthValue=false;
+      truthValue.set(0,false);
     }
   }
   public void draw(Graphics g){
@@ -307,7 +312,7 @@ class Not extends Gate{
     this.name="not";
   }
   public void operation(){
-    truthValue=!input_terminal.get(0);
+    truthValue.set(0,!input_terminal.get(0));
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
@@ -337,9 +342,9 @@ class Xor extends Or{
 	out+=1;
     }
     if (out%2==0)
-      truthValue=false;
+      truthValue.set(0,false);
     else
-      truthValue=true;
+      truthValue.set(0,true);
   }
   public void draw(Graphics g){
     super.draw(g);
@@ -362,9 +367,9 @@ class Xnor extends Nor{
 	out+=1;
     }
     if (out%2==0)
-      truthValue=true;
+      truthValue.set(0,true);
     else
-      truthValue=false;
+      truthValue.set(0,false);
   }
   public void draw(Graphics g){
     super.draw(g);
@@ -377,7 +382,7 @@ class Xnor extends Nor{
 
 class Input extends Gate{
   Font font=new Font("",Font.PLAIN,Screen.interval*2);
-  Input(Point point,boolean truthValue){
+  Input(Point point,ArrayList<Boolean> truthValue){
     super(point,0);
     outputs_e.add(new Point(70,10));
     this.name="input";
@@ -397,7 +402,7 @@ class Input extends Gate{
     p.lineTo(x+50,y+10);
     p.lineTo(x+66,y+10);
     g2.setFont(font);
-    if (truthValue)
+    if (truthValue.get(0))
       drawStringCenter(g,"H");
     else
       drawStringCenter(g,"L");
@@ -415,11 +420,12 @@ class Input extends Gate{
 
 class Output extends Gate{
   Font font=new Font("",Font.PLAIN,Screen.interval*2);
-  Output(Point point,boolean truthValue){
+  Output(Point point,ArrayList<Boolean> truthValue){
     super(point,1);
     inputs_e.add(new Point(-30,10));
     this.name="output";
     this.truthValue=truthValue;
+    this.output_terminals=0;
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;
@@ -435,7 +441,7 @@ class Output extends Gate{
     p.moveTo(x-10,y+10);
     p.lineTo(x-26,y+10);
     g2.setFont(font);
-    if (truthValue)
+    if (truthValue.get(0))
       drawStringCenter(g,"H");
     else
       drawStringCenter(g,"L");
@@ -482,7 +488,7 @@ class Line extends Gate{
       return end;
   }
   public void operation(){
-    truthValue=input_terminal.get(0);
+    truthValue.set(0,input_terminal.get(0));
   }
   public void draw(Graphics g){
     Graphics2D g2=(Graphics2D)g;

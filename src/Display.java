@@ -173,7 +173,9 @@ class Display extends JFrame implements KeyListener{
     JMenuItem item3_14=new JMenuItem("入力ノード");
     item3_14.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
-	screen.gate=new Input(screen.mousePoint,false);
+	ArrayList<Boolean> truthValue=new ArrayList<>();
+	truthValue.add(false);
+	screen.gate=new Input(screen.mousePoint,truthValue);
 	screen.state=0;
       }
     });
@@ -181,7 +183,9 @@ class Display extends JFrame implements KeyListener{
     JMenuItem item3_15=new JMenuItem("出力ノード");
     item3_15.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
-	screen.gate=new Output(screen.mousePoint,false);
+	ArrayList<Boolean> truthValue=new ArrayList<>();
+	truthValue.add(false);
+	screen.gate=new Output(screen.mousePoint,truthValue);
 	screen.state=0;
       }
     });
@@ -351,6 +355,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	  select=null;
 	}
       }else if (state==2){
+	ArrayList<Gate> a=new ArrayList<>();
 	for (Gate gate:gates){
 	  if (gate.name=="input" && gate.deleteRect().contains(mousePoint)){
 	    gate.setTruthValue();
@@ -386,12 +391,14 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 		    b-=Math.pow(2,j);
 		  }
 		  inputSide+=c;
-		  inputs.get(j).setTruthValue(c);
-		  run(inputs.get(j));
+		  inputs.get(j).setTruthValue(0,c);
+		  run(inputs.get(j),0);
 		}
 		String outputSide="";
 		for (Gate gate:outputs){
-		  outputSide+=((gate.truthValue) ? 1 : 0);
+		  for (int j=0;j<gate.truthValue.size();j++){
+		    outputSide+=((gate.truthValue.get(j)) ? 1 : 0);
+		  }
 		}
 		truthTable.put(inputSide,outputSide);
 	      }
@@ -413,7 +420,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
     }
     for (Gate gate:gates){
       if (gate.name=="input"){
-	run(gate);
+	run(gate,0);
       }
     }
     gate.update();
@@ -421,48 +428,43 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
       gate.update();
     }
   }
-  public void run(Gate gate){//実行 再帰関数
-    if (gate.name=="output"){
-      gate.truthValue=gate.input_terminal.get(0);
+  public void run(Gate gate,int index){//実行 再帰関数 gateは前のゲート indexは座標と真理値を受け取るためのインデックス
+    /*
+    for (Gate a:gates){
+      System.out.print(a.name+":");
+      for (boolean value:a.truthValue){
+	System.out.print(value+" ");
+      }
+      System.out.println("");
+    }
+    */
+    Point output;
+    if (gate.name=="line"){
+      output=gate.getEnd();
     }else{
-      for (Gate sub:gates){
-	if (gate!=sub){
-	  if (sub.name=="line"){
-	    if (gate.name=="line"){
-	      if (sub.getBegin().equals(gate.getEnd())){
-	      }else if (sub.getEnd().equals(gate.getEnd())){
-		sub.reverse();
-	      }else{
-		continue;
-	      }
-	      sub.input_terminal.set(0,gate.truthValue);
-	      sub.operation();
-	      run(sub);
-	    }else{
-	      if (sub.getBegin().equals(gate.outputs.get(0))){
-	      }else if (sub.getEnd().equals(gate.outputs.get(0))){
-		sub.reverse();
-	      }else{
-		continue;
-	      }
-	      sub.input_terminal.set(0,gate.truthValue);
-	      sub.operation();
-	      run(sub);
-	    }
-	  }else{
-	    for (int i=0;i<sub.terminals;i++){
-	      if (gate.name=="line"){
-		if (!sub.inputs.get(i).equals(gate.getEnd())){
-		  continue;
-		}
-	      }else{
-		if (!sub.inputs.get(i).equals(gate.outputs.get(0))){
-		  continue;
-		}
-	      }
-	      sub.input_terminal.set(i,gate.truthValue);
-	      sub.operation();
-	      run(sub);
+      output=gate.outputs.get(index);
+    }
+    boolean truthValue=gate.truthValue.get(index);
+    for (Gate g:gates){
+      if (g.name=="line"){
+	if (output.equals(g.getBegin())){
+	}else if (output.equals(g.getEnd())){
+	  g.reverse();
+	}else{
+	  continue;
+	}
+	g.input_terminal.set(0,truthValue);
+	g.operation();
+	run(g,0);
+      }else{
+	for (int i=0;i<g.terminals;i++){
+	  Point input=g.inputs.get(i);
+	  if (input.equals(output)){
+	    System.out.println(gate.name+"-"+g.name);
+	    g.input_terminal.set(i,truthValue);
+	    g.operation();
+	    for (int j=0;j<g.output_terminals;j++){
+	      run(g,j);
 	    }
 	  }
 	}
@@ -540,6 +542,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
     released=true;
   }
   public void keyPressed(KeyEvent e){
+    ArrayList<Boolean> truthTable=new ArrayList<>();
+    truthTable.add(false);
     switch(e.getKeyCode()){
       case KeyEvent.VK_ENTER:
 	released=true;
@@ -620,11 +624,11 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	state=0;
 	break;
       case KeyEvent.VK_D:
-	gate=new Input(mousePoint,false);
+	gate=new Input(mousePoint,truthTable);
 	state=0;
 	break;
       case KeyEvent.VK_E:
-	gate=new Output(mousePoint,false);
+	gate=new Output(mousePoint,truthTable);
 	state=0;
 	break;
       case KeyEvent.VK_F:
