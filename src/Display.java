@@ -217,9 +217,6 @@ class Display extends JFrame implements KeyListener{
   @Override
   public void keyReleased(KeyEvent e){
   }
-  public void update(){
-    screen.update();
-  }
 }
 
 class Screen extends JPanel implements MouseMotionListener,MouseListener{
@@ -471,6 +468,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   }
   public void paintComponent(Graphics g){
     super.paintComponent(g);
+    update();
     background(g);
     Graphics2D g2=(Graphics2D)g;
     g2.setStroke(new BasicStroke(2));

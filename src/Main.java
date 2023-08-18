@@ -4,7 +4,6 @@ public class Main{
     Display display=new Display("論理回路",1000,800);
     display.setVisible(true);
     while (true){
-      display.update();
       display.repaint();
     }
   }
