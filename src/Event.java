@@ -9,7 +9,7 @@ class SelectGate implements ActionListener{
     this.name=name;
   }
   @Override
-  public void actionPreformed(ActionEvent e){
+  public void actionPerformed(ActionEvent e){
     switch (name){
       case "and2":
 	break;
