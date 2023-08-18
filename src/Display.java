@@ -228,8 +228,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   public static int interval=10;
   public int state=0; //0:ゲート設置 1:削除 2:入力切り替え
   Color mouseColor=new Color(128,128,128,128);
-  //public Gate gate=new And(mousePoint,2);
-  public Gate gate=new Block(mousePoint,new HashMap<String,String>(),"a",2,2);
+  public Gate gate=new And(mousePoint,2);
+  //public Gate gate=new Block(mousePoint,new HashMap<String,String>(),"a",2,2);
   ArrayList<Gate> gates=new ArrayList<>();
   boolean moved=false;
   boolean released=false;
