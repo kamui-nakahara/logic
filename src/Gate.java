@@ -10,23 +10,24 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.Serializable;
 
-class Gate{
+class Gate implements Serializable{
   HashMap<String,String> truthTable=new HashMap<>();
   public Color strokeColor=Color.BLACK;
   public String name;
-  public int X;
-  public int Y;
+  public int X=0;
+  public int Y=0;
   ArrayList<Point> inputs_e=new ArrayList<>();//入力端子の相対座標
   ArrayList<Point> outputs_e=new ArrayList<>();//出力端子の相対座標
   public ArrayList<Point> inputs=new ArrayList<>();//入力端子の絶対座標
   public ArrayList<Point> outputs=new ArrayList<>();//出力端子の絶対座標
-  public Point begin;
-  public Point end;
+  public Point begin=null;
+  public Point end=null;
   public boolean truthValue;
   public int terminals;
   int output_terminals;
-  Point center;
+  Point center=null;
   ArrayList<Point> over=new ArrayList<>();//重なってる端子を赤色にする
   Color rectColor=Color.BLUE;
   public ArrayList<Boolean> input_terminal=new ArrayList<>();
@@ -38,6 +39,29 @@ class Gate{
       input_terminal.add(false);
     }
   }
+  /*
+  Gate(HashMap<String,String> truthTable,String name,int X,int Y,ArrayList<Point> inpute_s,ArrayList<Point> outputs_e,ArrayList<Point> inputs,ArrayList<Point> outputs,Point begin,Point end,boolean truthValue,int terminals,int output_terminals,Point center,ArrayList<Point> over,ArrayList<Boolean> input_terminal){
+    this.truthTable=truthTable;
+    this.name=name;
+    this.X=X;
+    this.Y=Y;
+    this.inputs_e=inputs_e;
+    this.outputs_e=outputs_e;
+    this.inputs=inputs;
+    this.outputs=outputs;
+    this.begin=begin;
+    this.end=end;
+    this.truthValue=truthValue;
+    this.terminals=terminals;
+    this.output_terminals=output_terminals;
+    this.center=center;
+    this.over=over;
+    this.input_terminal=input_terminal;
+  }
+  public Gate copy(){
+    return new Gate(truthTable,name,X,Y,inputs_e,outputs_e,inputs,outputs,begin,end,truthValue,terminals,output_terminals,center,over,input_terminal);
+  }
+  */
   public Point getCenter(){
     return center;
   }
@@ -58,7 +82,7 @@ class Gate{
     }
     int cx;
     int cy;
-    if (name=="line"){
+    if (name.equals("line")){
       if (getEnd()==null){
 	cx=0;
 	cy=0;
@@ -555,5 +579,70 @@ class Block extends Gate{
       g.drawLine(x+Screen.interval*4,y+Screen.interval*2,x+Screen.interval*6,y+Screen.interval*2);
       dot(g,x+Screen.interval*6,y+Screen.interval*2);
     }
+  }
+}
+
+class SevenSegment extends Gate{
+  SevenSegment(Point point){
+    super(point,7);
+    this.terminals=terminals;
+    inputs_e.add(new Point(-20,-10));
+    inputs_e.add(new Point(-20,0));
+    inputs_e.add(new Point(-20,10));
+    inputs_e.add(new Point(-20,20));
+    inputs_e.add(new Point(-20,30));
+    inputs_e.add(new Point(-20,40));
+    inputs_e.add(new Point(-20,50));
+    if (terminals==3){
+      inputs_e.add(new Point(-20,20));
+    }
+    this.name="sevenSegment";
+  }
+  public void draw(Graphics g){
+    int x=X-Screen.interval*2;
+    int y=Y-Screen.interval*2;
+    if (input_terminal.get(0))
+      g.fillRect(x+20,y-10,40,10);
+    else
+      g.drawRect(x+20,y-10,40,10);
+    if (input_terminal.get(1))
+      g.fillRect(x+60,y,10,40);
+    else
+      g.drawRect(x+60,y,10,40);
+    if (input_terminal.get(2))
+      g.fillRect(x+60,y+50,10,40);
+    else
+      g.drawRect(x+60,y+50,10,40);
+    if (input_terminal.get(3))
+      g.fillRect(x+20,y+90,40,10);
+    else
+      g.drawRect(x+20,y+90,40,10);
+    if (input_terminal.get(4))
+      g.fillRect(x+10,y+50,10,40);
+    else
+      g.drawRect(x+10,y+50,10,40);
+    if (input_terminal.get(5))
+      g.fillRect(x+10,y,10,40);
+    else
+      g.drawRect(x+10,y,10,40);
+    if (input_terminal.get(6))
+      g.fillRect(x+20,y+40,40,10);
+    else
+      g.drawRect(x+20,y+40,40,10);
+    g.drawRect(x,y-20,80,130);
+    g.drawLine(x-20,y-10,x,y-10);
+    g.drawLine(x-20,y,x,y);
+    g.drawLine(x-20,y+10,x,y+10);
+    g.drawLine(x-20,y+20,x,y+20);
+    g.drawLine(x-20,y+30,x,y+30);
+    g.drawLine(x-20,y+40,x,y+40);
+    g.drawLine(x-20,y+50,x,y+50);
+    dot(g,x-20,y-10);
+    dot(g,x-20,y);
+    dot(g,x-20,y+10);
+    dot(g,x-20,y+20);
+    dot(g,x-20,y+30);
+    dot(g,x-20,y+40);
+    dot(g,x-20,y+50);
   }
 }

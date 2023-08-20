@@ -4,6 +4,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
@@ -19,11 +20,14 @@ import java.awt.Point;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.File;
 
 class Display extends JFrame implements KeyListener{
   public int width;
   public int height;
   Screen screen;
+  Save save=new Save();
+  Load load=new Load();
   Display(String title,int width,int height){
     super(title);
     this.width=width;
@@ -41,6 +45,33 @@ class Display extends JFrame implements KeyListener{
       }
     });
     menu1.add(item1_1);
+    /*
+    Display display=this;
+    JMenuItem item1_2=new JMenuItem("保存");
+    item1_2.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+	JFileChooser filechooser=new JFileChooser();
+	int select=filechooser.showSaveDialog(display);
+	if (select==JFileChooser.APPROVE_OPTION){
+	  File file=filechooser.getSelectedFile();
+	  save.save(file.getPath(),screen.gates);
+	}
+      }
+    });
+    menu1.add(item1_2);
+    JMenuItem item1_3=new JMenuItem("開く");
+    item1_3.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+	JFileChooser filechooser=new JFileChooser();
+	int select=filechooser.showOpenDialog(display);
+	if (select==JFileChooser.APPROVE_OPTION){
+	  File file=filechooser.getSelectedFile();
+	  screen.gates=load.load(file.getPath());
+	}
+      }
+    });
+    menu1.add(item1_3);
+    */
     menubar.add(menu1);
     JMenu menu2=new JMenu("編集");
     JMenuItem item2_1=new JMenuItem("削除");
@@ -170,30 +201,38 @@ class Display extends JFrame implements KeyListener{
       }
     });
     menu3.add(item3_13);
-    JMenuItem item3_14=new JMenuItem("入力ノード");
+    JMenuItem item3_14=new JMenuItem("7セグメントLED");
     item3_14.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent e){
+	screen.gate=new SevenSegment(screen.mousePoint);
+	screen.state=0;
+      }
+    });
+    menu3.add(item3_14);
+    JMenuItem item3_15=new JMenuItem("入力ノード");
+    item3_15.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Input(screen.mousePoint,false);
 	screen.state=0;
       }
     });
-    menu3.add(item3_14);
-    JMenuItem item3_15=new JMenuItem("出力ノード");
-    item3_15.addActionListener(new ActionListener(){
+    menu3.add(item3_15);
+    JMenuItem item3_16=new JMenuItem("出力ノード");
+    item3_16.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Output(screen.mousePoint,false);
 	screen.state=0;
       }
     });
-    menu3.add(item3_15);
-    JMenuItem item3_16=new JMenuItem("結線");
-    item3_16.addActionListener(new ActionListener(){
+    menu3.add(item3_16);
+    JMenuItem item3_17=new JMenuItem("結線");
+    item3_17.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
 	screen.gate=new Line(screen.mousePoint);
 	screen.state=0;
       }
     });
-    menu3.add(item3_16);
+    menu3.add(item3_17);
     menubar.add(menu3);
     setJMenuBar(menubar);
 
@@ -207,12 +246,7 @@ class Display extends JFrame implements KeyListener{
   }
   @Override
   public void keyPressed(KeyEvent e){
-    if (e.getKeyCode()==KeyEvent.VK_ESCAPE){
-      dispose();
-      System.exit(0);
-    }else{
-      screen.keyPressed(e);
-    }
+    screen.keyPressed(e);
   }
   @Override
   public void keyReleased(KeyEvent e){
@@ -227,6 +261,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   Color mouseColor=new Color(128,128,128,128);
   public Gate gate=new And(mousePoint,2);
   //public Gate gate=new Block(mousePoint,new HashMap<String,String>(),"a",2,2);
+  //public Gate gate=new SevenSegment(mousePoint);
   ArrayList<Gate> gates=new ArrayList<>();
   boolean moved=false;
   boolean released=false;
@@ -325,6 +360,9 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	    case "output":
 	      gate=new Output(new Point(gate.X,gate.Y),gate.truthValue);
 	      break;
+	    case "sevenSegment":
+	      gate=new SevenSegment(new Point(gate.X,gate.Y));
+	      break;
 	  }
 	}
       }else if (state==1){
@@ -421,6 +459,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   public void run(Gate gate){//実行 再帰関数
     if (gate.name=="output"){
       gate.truthValue=gate.input_terminal.get(0);
+    }else if (gate.name=="sevenSegment"){
     }else{
       for (Gate sub:gates){
 	if (gate!=sub){
@@ -618,14 +657,18 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	state=0;
 	break;
       case KeyEvent.VK_D:
-	gate=new Input(mousePoint,false);
+	gate=new SevenSegment(mousePoint);
 	state=0;
 	break;
       case KeyEvent.VK_E:
-	gate=new Output(mousePoint,false);
+	gate=new Input(mousePoint,false);
 	state=0;
 	break;
       case KeyEvent.VK_F:
+	gate=new Output(mousePoint,false);
+	state=0;
+	break;
+      case KeyEvent.VK_G:
 	gate=new Line(mousePoint);
 	state=0;
 	break;
