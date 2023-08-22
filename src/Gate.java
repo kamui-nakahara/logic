@@ -39,29 +39,6 @@ class Gate implements Serializable{
       input_terminal.add(false);
     }
   }
-  /*
-  Gate(HashMap<String,String> truthTable,String name,int X,int Y,ArrayList<Point> inpute_s,ArrayList<Point> outputs_e,ArrayList<Point> inputs,ArrayList<Point> outputs,Point begin,Point end,boolean truthValue,int terminals,int output_terminals,Point center,ArrayList<Point> over,ArrayList<Boolean> input_terminal){
-    this.truthTable=truthTable;
-    this.name=name;
-    this.X=X;
-    this.Y=Y;
-    this.inputs_e=inputs_e;
-    this.outputs_e=outputs_e;
-    this.inputs=inputs;
-    this.outputs=outputs;
-    this.begin=begin;
-    this.end=end;
-    this.truthValue=truthValue;
-    this.terminals=terminals;
-    this.output_terminals=output_terminals;
-    this.center=center;
-    this.over=over;
-    this.input_terminal=input_terminal;
-  }
-  public Gate copy(){
-    return new Gate(truthTable,name,X,Y,inputs_e,outputs_e,inputs,outputs,begin,end,truthValue,terminals,output_terminals,center,over,input_terminal);
-  }
-  */
   public Point getCenter(){
     return center;
   }

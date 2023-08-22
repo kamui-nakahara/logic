@@ -5,6 +5,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
+import javax.swing.JScrollPane;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
@@ -18,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.BasicStroke;
 import java.awt.Point;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
@@ -45,7 +47,6 @@ class Display extends JFrame implements KeyListener{
       }
     });
     menu1.add(item1_1);
-    /*
     Display display=this;
     JMenuItem item1_2=new JMenuItem("保存");
     item1_2.addActionListener(new ActionListener(){
@@ -71,7 +72,6 @@ class Display extends JFrame implements KeyListener{
       }
     });
     menu1.add(item1_3);
-    */
     menubar.add(menu1);
     JMenu menu2=new JMenu("編集");
     JMenuItem item2_1=new JMenuItem("削除");
@@ -237,7 +237,13 @@ class Display extends JFrame implements KeyListener{
     setJMenuBar(menubar);
 
     this.screen=new Screen(this);
-    add(screen);
+    screen.setPreferredSize(new Dimension(width,height));
+
+    JScrollPane scrollpane=new JScrollPane(screen);
+    scrollpane.setPreferredSize(new Dimension(width,height));
+    scrollpane.getVerticalScrollBar().setUnitIncrement(25);
+
+    add(scrollpane);
 
     addKeyListener(this);
   }
@@ -254,6 +260,8 @@ class Display extends JFrame implements KeyListener{
 }
 
 class Screen extends JPanel implements MouseMotionListener,MouseListener{
+  int width;
+  int height;
   public Point mousePoint=new Point(0,0);
   Display display;
   public static int interval=10;
@@ -270,6 +278,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   Screen(Display display){
     super();
     this.display=display;
+    this.width=display.width;
+    this.height=display.height;
     addMouseMotionListener(this);
     addMouseListener(this);
   }
@@ -321,6 +331,14 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
     }
     if (released){
       if (state==0){
+	if (width-200<mousePoint.x){
+	  width+=500;
+	  setPreferredSize(new Dimension(width,height));
+	}
+	if (height-200<mousePoint.y){
+	  height+=500;
+	  setPreferredSize(new Dimension(width,height));
+	}
 	if (gate.name=="line"){
 	  if (gate.getBegin()==null){
 	    gate.setBegin(new Point(mousePoint.x,mousePoint.y));
@@ -408,7 +426,8 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	    }
 	  }
 	  if (removeGates.size()>0 && inputs.size()>0 && outputs.size()>0){
-	    String name=JOptionPane.showInputDialog(display,"ブロックの名前を定義");
+	    /*
+	    String name=JOptionPane.showInputDialog(null,"ブロックの名前を定義");
 	    HashMap<String,String> truthTable=new HashMap<>();
 	    if (!name.equals("")){
 	      for (int i=0;i<Math.pow(2,inputs.size());i++){
@@ -435,6 +454,7 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
 	      }
 	      System.out.println("");
 	    }
+	    */
 	  }
 	  select=null;
       }
@@ -533,13 +553,13 @@ class Screen extends JPanel implements MouseMotionListener,MouseListener{
   }
   void background(Graphics g){
     g.setColor(Color.WHITE);
-    g.fillRect(0,0,display.width,display.height);
+    g.fillRect(0,0,width,height);
     g.setColor(new Color(128,128,128,128));
-    for (int x=0;x<display.width;x+=interval){
-      g.drawLine(x,0,x,display.height);
+    for (int x=0;x<width;x+=interval){
+      g.drawLine(x,0,x,height);
     }
-    for (int y=0;y<display.height;y+=interval){
-      g.drawLine(0,y,display.width,y);
+    for (int y=0;y<height;y+=interval){
+      g.drawLine(0,y,width,y);
     }
   }
   @Override
